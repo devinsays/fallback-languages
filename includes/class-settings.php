@@ -54,17 +54,27 @@ class Fallback_Locales_Settings {
 				<table class="form-table">
 
 					<tr valign="top">
-						<th scope="row"><?php _e( 'Current Locale', 'fallback-locales' ); ?></th>
+						<th scope="row"><?php _e( 'Install Locale', 'fallback-locales' ); ?></th>
 						<td><?php echo get_locale(); ?></td>
 					</tr>
 
+					<?php foreach ( array( 1, 2, 3 ) as $fallback ) : ?>
+					<?php $id = 'fallback_locale_' . $fallback; ?>
 					<tr valign="top">
-						<th scope="row"><?php _e( 'Fallback Locale #1', 'fallback-locales' ); ?></th>
+						<th scope="row">
+							<?php printf( __( 'Fallback Locale #%s', 'fallback-locales' ), $fallback ); ?>
+						</th>
 						<td>
-							<?php $fallback_locale_1 = $options['fallback_locale_1']; ?>
-							<?php $this->get_locales_select( 'fallback_locale_1', $fallback_locale_1 ); ?>
+						<?php
+							$value = '';
+							if ( isset( $options[$id] ) ) {
+								$value = $options[$id];
+							}
+							$this->get_locales_select( $id, $value );
+						?>
 						</td>
 					</tr>
+					<?php endforeach; ?>
 
 					<tr valign="top">
 						<th scope="row">
