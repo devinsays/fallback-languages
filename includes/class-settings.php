@@ -117,26 +117,37 @@ class Fallback_Locales_Settings {
 
 	function get_locales_select( $id, $value ) {
 
-		$languages = $this->get_available_locales();
+		$locales = $this->get_available_locales();
+		foreach ( $locales as $locale ) {
+			$group = $locale['group'];
+			$section[$group][] = $locale;
+		}
 
 		echo '<select id="fallback_locales_' . $id . '" name="fallback_locales[' . $id . ']">\n';
 		echo '<option>' . __( 'No Selection', 'fallback-locales' ) . '</option>' . "\n";
-		foreach ( $languages as $language ) {
-			$code = $language['language'];
-			?>
-			<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $value, $code ); ?>>
-				<?php echo $code; ?>
-			</option>
-		<?php }
+		foreach ( $section as $key => $group ) {
+			echo '<optgroup label="' . $key . '">';
+			foreach ( $group as $locale ) {
+				$code = $locale['language']; ?>
+				<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $value, $code ); ?>>
+					<?php echo esc_html( $code ); ?>
+				</option>
+			<?php }
+			echo '</optgroup>';
+		}
 		echo '</select>';
 
 	}
 
 	function get_available_locales() {
 		return array(
-			'es_CO' => array( 'language' => 'es_CO' ),
-			'es_ES' => array( 'language' => 'es_ES' ),
-			'es_MX' => array( 'language' => 'es_MX' ),
+			'es_CO' => array( 'language' => 'es_CO', 'group' => 'es' ),
+			'es_ES' => array( 'language' => 'es_ES', 'group' => 'es' ),
+			'es_MX' => array( 'language' => 'es_MX', 'group' => 'es' ),
+			'fr_CA' => array( 'language' => 'fr_CA', 'group' => 'fr' ),
+			'fr_FR' => array( 'language' => 'fr_FR', 'group' => 'fr' ),
+			'pt_BR' => array( 'language' => 'pt_BR', 'group' => 'pt' ),
+			'pt_PT' => array( 'language' => 'pt_PT', 'group' => 'pt' )
 		);
 	}
 
