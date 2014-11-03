@@ -14,6 +14,9 @@ If translations are not available for a specific language locale, this plugin wi
 
 * Add JS for tab switcher
 * Add button to clear transient cache
+* Clear transient automatically on plugin/theme update
+* Test with language packs
+* Test multisite
 
 ## Changelog ##
 

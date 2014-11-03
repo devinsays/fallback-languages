@@ -133,7 +133,11 @@ class Fallback_Locales_Settings {
 						<?php foreach ( $status as $textdomain => $mofile ) : ?>
 							<tr valign="top">
 								<td><?php echo $textdomain; ?></td>
-								<td><?php echo $mofile; ?></td>
+								<?php if ( false === $mofile ) : ?>
+									<td><?php _e( 'Default', 'fallback-locales' ); ?></td>
+								<?php else : ?>
+									<td><?php echo str_replace( get_home_path(), '', $mofile ); ?></td>
+								<?php endif; ?>
 							</tr>
 						<?php endforeach;
 					else :
