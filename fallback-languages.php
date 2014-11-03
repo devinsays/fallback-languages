@@ -21,5 +21,7 @@ require plugin_dir_path( __FILE__ ) . '/includes/class-settings.php';
 $settings = new Fallback_Locales_Settings;
 $settings->init();
 
-// Selects the text domains
-// require plugin_dir_path( __FILE__ ) . '/includes/class-textdomain-filter.php';
+// Selects the translation files to use
+require plugin_dir_path( __FILE__ ) . '/includes/class-textdomain-filter.php';
+$fallbacks = new Fallback_Locales_Textdomain_Filter;
+$fallbacks->init();

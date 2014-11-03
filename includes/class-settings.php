@@ -124,7 +124,7 @@ class Fallback_Locales_Settings {
 		}
 
 		echo '<select id="fallback_locales_' . $id . '" name="fallback_locales[' . $id . ']">\n';
-		echo '<option>' . __( 'No Selection', 'fallback-locales' ) . '</option>' . "\n";
+		echo '<option value="">' . __( 'No Selection', 'fallback-locales' ) . '</option>' . "\n";
 		foreach ( $section as $key => $group ) {
 			echo '<optgroup label="' . $key . '">';
 			foreach ( $group as $locale ) {

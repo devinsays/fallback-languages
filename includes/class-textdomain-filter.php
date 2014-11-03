@@ -9,59 +9,107 @@
  */
 
 class Fallback_Locales_Textdomain_Filter {
-}
 
-/**
- * Checks if the $mofile is readable.  If not, it will return an alternate translation in the same
- * language if available.  Otherwise, the original is returned.
- *
- * @param string $mofile Path to the MO file.
- * @param string $domain Text domain. Unique identifier for retrieving translated strings.
- */
-function fallback_locales_textdomain_mofile( $mofile, $domain ) {
+	public function init() {
 
-	if ( !is_readable( $mofile ) ) {
+		add_filter( 'load_textdomain_mofile', array( $this, 'load_fallback_textdomain_mofile' ), 100, 2 );
 
-		$fallback = get_fallback_locale_translations( $mofile, $domain );
-
-		if ( false != $fallback ) {
-			return $fallback;
-		}
 	}
 
-	return $mofile;
-}
-add_filter( 'load_textdomain_mofile', 'fallback_locales_textdomain_mofile', 100, 2 );
+	/**
+	 * Checks if the $mofile is readable.
+	 * If not, it loads any of the fallback locales that have been selected.
+	 * If not, it will load any locale within same language group if option is selected.
+	 *
+	 * @param string $mofile Path to the MO file.
+	 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+	 */
+	function load_fallback_textdomain_mofile( $mofile, $domain ) {
 
-/**
- * Looks for fallback translation files to use if locale is not available.
- *
- * @since 0.1.0
- *
- * @param string $domain Text domain. Unique identifier for retrieving translated strings.
- * @param string $mofile Path to the .mo file.
- * @return false or string $mofile Path
- */
-function get_fallback_locale_translations( $mofile, $domain ) {
+		if ( !is_readable( $mofile ) ) :
 
-	$languages = get_available_languages( dirname( $mofile ) );
+			$fallback_options = array(
+				'fallback_locale_1' => '',
+				'fallback_locale_2' => '',
+				'fallback_locale_3' => ''
+			);
 
-	if ( empty( $languages ) ) {
+			$options = get_option( 'fallback_locales', $fallback_options );
+			$options = array_merge( $fallback_options, $options );
+
+			// Search for selected fallback locales
+			foreach( $fallback_options as $key => $fallback_option ) :
+				$fallback = false;
+				if ( '' != $options[$key] ) {
+					$fallback = $this->get_selected_fallback_mofile( $mofile, $domain, $options[$key] );
+					if ( false != $fallback ) {
+						return $fallback;
+					}
+				}
+			endforeach;
+
+			// Search for any fallback within the same language
+			if ( isset( $options['fallback'] ) &&  $options['fallback'] ) :
+				$fallback = $this->get_language_fallback_mofile( $mofile, $domain );
+				if ( false != $fallback ) {
+					return $fallback;
+				}
+			endif;
+
+		endif;
+
+		return $mofile;
+	}
+
+	/**
+	 * Looks for selected fallback locales.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+	 * @param string $mofile Path to the .mo file.
+	 * @return false or string $mofile Path
+	 */
+	function get_selected_fallback_mofile( $mofile, $domain, $fallback ) {
+
+		$fallback_locale = dirname( $mofile ) . '/' . $fallback . '.mo';
+		if ( is_readable( $fallback_locale ) ) {
+			return $fallback_locale;
+		}
+
 		return false;
 	}
 
-	$locale_base = substr( get_locale(), 0, 2);
+	/**
+	 * Looks for fallback translation files to use if locale is not available.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+	 * @param string $mofile Path to the .mo file.
+	 * @return false or string $mofile Path
+	 */
+	function get_language_fallback_mofile( $mofile, $domain ) {
 
-	foreach ( $languages as $language ) {
-		$language_base = substr( $language, -5, 2);
-		if ( $locale_base == $language_base ) {
-			$alt_mofile = dirname( $mofile ) . '/' . $language . '.mo';
-			$mofile = apply_filters( 'load_textdomain_mofile', $alt_mofile, $domain );
-			if ( is_readable( $mofile ) ) {
-				return $mofile;
+		$languages = get_available_languages( dirname( $mofile ) );
+
+		if ( empty( $languages ) ) {
+			return false;
+		}
+
+		$locale_base = substr( get_locale(), 0, 2 );
+
+		foreach ( $languages as $language ) {
+			$language_base = substr( $language, -5, 2 );
+			if ( $locale_base == $language_base ) {
+				$fallback_locale = dirname( $mofile ) . '/' . $language . '.mo';
+				if ( is_readable( $fallback_locale ) ) {
+					return $fallback_locale;
+				}
 			}
 		}
+
+		return false;
 	}
 
-	return false;
 }
