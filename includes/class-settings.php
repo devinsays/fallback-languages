@@ -10,6 +10,11 @@
 
 class Fallback_Locales_Settings {
 
+	/**
+	 * Hooks to load settings page.
+	 *
+	 * @since 0.1.0
+	 */
 	public function init() {
 
 		add_action( 'admin_init', array( $this, 'settings_init' ) );
@@ -17,6 +22,11 @@ class Fallback_Locales_Settings {
 
 	}
 
+	/**
+	 * Registers settings.
+	 *
+	 * @since 0.1.0
+	 */
 	function settings_init(){
 		register_setting(
 			'fallback_locales',
@@ -25,6 +35,11 @@ class Fallback_Locales_Settings {
 		);
 	}
 
+	/**
+	 * Adds settings page and callbacks.
+	 *
+	 * @since 0.1.0
+	 */
 	function theme_options_add_page() {
 		add_options_page(
 			__( 'Fallback Locales', 'fallback-locales' ),
@@ -35,6 +50,11 @@ class Fallback_Locales_Settings {
 		);
 	}
 
+	/**
+	 * Renders the settings page.
+	 *
+	 * @since 0.1.0
+	 */
 	function settings_page() {
 
 		if ( ! isset( $_REQUEST['settings-updated'] ) )
@@ -96,6 +116,11 @@ class Fallback_Locales_Settings {
 		<?php
 	}
 
+	/**
+	 * Sanitizes the data for the settings page.
+	 *
+	 * @since 0.1.0
+	 */
 	function settings_validate( $input ) {
 
 		$locales = $this->get_available_locales();
@@ -115,6 +140,14 @@ class Fallback_Locales_Settings {
 		return $input;
 	}
 
+	/**
+	 * Renders the select boxes used to select fallback locales.
+	 *
+	 * @since 0.1.0
+	 *
+	 * param $id ID to be applied to the select box and save the value.
+	 * param $value Saved value for the select box.
+	 */
 	function get_locales_select( $id, $value ) {
 
 		$locales = $this->get_available_locales();
@@ -139,8 +172,14 @@ class Fallback_Locales_Settings {
 
 	}
 
+	/**
+	 * Returns list of available locales to select from.
+	 *
+	 * @since 0.1.0
+	 */
 	function get_available_locales() {
-		return array(
+
+		$locales = array(
 			'es_CO' => array( 'language' => 'es_CO', 'group' => 'es' ),
 			'es_ES' => array( 'language' => 'es_ES', 'group' => 'es' ),
 			'es_MX' => array( 'language' => 'es_MX', 'group' => 'es' ),
@@ -149,6 +188,8 @@ class Fallback_Locales_Settings {
 			'pt_BR' => array( 'language' => 'pt_BR', 'group' => 'pt' ),
 			'pt_PT' => array( 'language' => 'pt_PT', 'group' => 'pt' )
 		);
+
+		return apply_filters( 'fallback_locales', $locales );
 	}
 
 }
