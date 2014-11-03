@@ -26,7 +26,21 @@ class Fallback_Locales_Textdomain_Filter {
 	 */
 	function load_fallback_textdomain_mofile( $mofile, $domain ) {
 
+		// echo $mofile . ' : ' .  $domain . '<br>';
+
 		if ( !is_readable( $mofile ) ) :
+
+			// Check if fallback locale is cached in a transient
+			$cached = get_transient( 'fallback_locales' );
+
+			if ( false === $cached ) {
+				$cached = array();
+			}
+
+			// Return cached path to $mofile for textdomain if set
+			if ( isset( $cached[$domain] ) ) {
+				return $cached[$domain];
+			}
 
 			$fallback_options = array(
 				'fallback_locale_1' => '',
@@ -43,6 +57,9 @@ class Fallback_Locales_Textdomain_Filter {
 				if ( '' != $options[$key] ) {
 					$fallback = $this->get_selected_fallback_mofile( $mofile, $domain, $options[$key] );
 					if ( false != $fallback ) {
+						$cached[$domain] = $fallback;
+						// Cache path to mofile in transient, expires every 30 days
+						set_transient( 'fallback_locales', $cached, ( 60 * 60 * 24 * 30 ) );
 						return $fallback;
 					}
 				}
@@ -52,6 +69,9 @@ class Fallback_Locales_Textdomain_Filter {
 			if ( isset( $options['fallback'] ) &&  $options['fallback'] ) :
 				$fallback = $this->get_language_fallback_mofile( $mofile, $domain );
 				if ( false != $fallback ) {
+					$cached[$domain] = $fallback;
+					// Cache path to mofile in transient, expires every 30 days
+					set_transient( 'fallback_locales', $cached, ( 60 * 60 * 24 * 30 ) );
 					return $fallback;
 				}
 			endif;
@@ -72,9 +92,12 @@ class Fallback_Locales_Textdomain_Filter {
 	 */
 	function get_selected_fallback_mofile( $mofile, $domain, $fallback ) {
 
-		$fallback_locale = dirname( $mofile ) . '/' . $fallback . '.mo';
-		if ( is_readable( $fallback_locale ) ) {
-			return $fallback_locale;
+		$fallback_mofile = dirname( $mofile ) . '/' . $fallback . '.mo';
+
+		echo 'fallback-mofile: ' . $fallback_mofile . '<br>';
+
+		if ( is_readable( $fallback_mofile ) ) {
+			return $fallback_mofile;
 		}
 
 		return false;
