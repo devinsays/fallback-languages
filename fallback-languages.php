@@ -2,7 +2,7 @@
 /*
 Plugin Name: Fallback Locales
 Plugin URI: http://wptheming.com
-Description: If translations are not available in your locale, alternate translations can be loaded. You can choose the order of fallback locales, or have the plugin load any translation files that match the install language.
+Description: If translations are not available for the set language locale, this plugin will attempt to load alternate translation locales in the same language before falling back to English.
 Author: Devin Price
 Version: 0.1.0
 Author URI: http://wptheming.com

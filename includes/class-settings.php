@@ -19,6 +19,7 @@ class Fallback_Locales_Settings {
 
 		add_action( 'admin_init', array( $this, 'settings_init' ) );
 		add_action( 'admin_menu', array( $this, 'theme_options_add_page' ) );
+		add_action( 'admin_enqueue_scripts' , array( $this, 'settings_js' ) );
 
 	}
 
@@ -48,6 +49,7 @@ class Fallback_Locales_Settings {
 			'fallback-locales',
 			array( $this, 'settings_page' )
 		);
+
 	}
 
 	/**
@@ -68,87 +70,129 @@ class Fallback_Locales_Settings {
 			?>
 
 			<h2 class="nav-tab-wrapper">
-	        	<a id="options-group-1-tab" class="nav-tab nav-tab-active" href="#">Settings</a>
-	        	<a id="options-group-2-tab" class="nav-tab" href="#">Status</a>
+	        	<a class="nav-tab nav-tab-active" href="#settings-panel">Settings</a>
+	        	<a class="nav-tab" href="#status-panel">Status</a>
 	        </h2>
 
-			<div class="settings-panel">
-				<form method="post" action="options.php">
-					<?php settings_fields( 'fallback_locales' ); ?>
-					<?php $options = get_option( 'fallback_locales' ); ?>
+	        <?php $this->settings_panel(); ?>
 
-					<table class="form-table">
-
-						<tr valign="top">
-							<th scope="row"><?php _e( 'Install Locale', 'fallback-locales' ); ?></th>
-							<td><?php echo get_locale(); ?></td>
-						</tr>
-
-						<?php foreach ( array( 1, 2, 3 ) as $fallback ) : ?>
-						<?php $id = 'fallback_locale_' . $fallback; ?>
-						<tr valign="top">
-							<th scope="row">
-								<?php printf( __( 'Fallback Locale #%s', 'fallback-locales' ), $fallback ); ?>
-							</th>
-							<td>
-							<?php
-								$value = '';
-								if ( isset( $options[$id] ) ) {
-									$value = $options[$id];
-								}
-								$this->get_locales_select( $id, $value );
-							?>
-							</td>
-						</tr>
-						<?php endforeach; ?>
-
-						<tr valign="top">
-							<th scope="row">
-								<?php _e( 'Language Fallback', 'fallback-locales' ); ?>
-							</th>
-							<td>
-								<input id="fallback_locales[fallback]" name="fallback_locales[fallback]" type="checkbox" value="1" <?php checked( '1', $options['fallback'] ); ?> />
-								<label class="description" for="fallback_locales[fallback]"><?php _e( 'Fallback to any locale within language.', 'fallback-locales' ); ?></label>
-							</td>
-						</tr>
-
-					</table>
-
-					<p class="submit">
-						<input type="submit" class="button-primary" value="<?php _e( 'Save Options', 'fallback-locales' ); ?>" />
-					</p>
-				</form>
-			</div>
-
-			<div class="status-panel">
-				<h3><?php _e( 'Status', 'fallback-locales' ); ?></h3>
-				<table class="form-table">
-				<?php
-					$status = get_transient( 'fallback_locales' );
-					if ( $status ) : ?>
-						<tr>
-							<th><?php _e( 'Textdomain', 'fallback-locales' ); ?></th>
-							<th><?php _e( 'Translation Path', 'fallback-locales' ); ?></th>
-						</tr>
-						<?php foreach ( $status as $textdomain => $mofile ) : ?>
-							<tr valign="top">
-								<td><?php echo $textdomain; ?></td>
-								<?php if ( false === $mofile ) : ?>
-									<td><?php _e( 'Default', 'fallback-locales' ); ?></td>
-								<?php else : ?>
-									<td><?php echo str_replace( get_home_path(), '', $mofile ); ?></td>
-								<?php endif; ?>
-							</tr>
-						<?php endforeach;
-					else :
-						_e( 'No fallback locales in use.', 'fallback-locales' );
-					endif;
-				?>
-				</table>
-			</div>
+	         <?php $this->status_panel(); ?>
 
 		</div>
 		<?php
+	}
+
+	/**
+	 * Renders the settings panel.
+	 *
+	 * @since 0.1.0
+	 */
+	function settings_panel() { ?>
+
+		<div id="settings-panel" class="panel">
+			<form method="post" action="options.php">
+				<?php settings_fields( 'fallback_locales' ); ?>
+				<?php $options = get_option( 'fallback_locales' ); ?>
+
+				<table class="form-table">
+
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Install Locale', 'fallback-locales' ); ?></th>
+						<td><?php echo get_locale(); ?></td>
+					</tr>
+
+					<?php foreach ( array( 1, 2, 3 ) as $fallback ) : ?>
+					<?php $id = 'fallback_locale_' . $fallback; ?>
+					<tr valign="top">
+						<th scope="row">
+							<?php printf( __( 'Fallback Locale #%s', 'fallback-locales' ), $fallback ); ?>
+						</th>
+						<td>
+						<?php
+							$value = '';
+							if ( isset( $options[$id] ) ) {
+								$value = $options[$id];
+							}
+							$this->get_locales_select( $id, $value );
+						?>
+						</td>
+					</tr>
+					<?php endforeach; ?>
+
+					<tr valign="top">
+						<th scope="row">
+							<?php _e( 'Language Fallback', 'fallback-locales' ); ?>
+						</th>
+						<td>
+							<input id="fallback_locales[fallback]" name="fallback_locales[fallback]" type="checkbox" value="1" <?php checked( '1', $options['fallback'] ); ?> />
+							<label class="description" for="fallback_locales[fallback]"><?php _e( 'Fallback to any locale within language.', 'fallback-locales' ); ?></label>
+						</td>
+					</tr>
+
+				</table>
+
+				<p class="submit">
+					<input type="submit" class="button-primary" value="<?php _e( 'Save Options', 'fallback-locales' ); ?>" />
+				</p>
+			</form>
+		</div>
+
+	<?php }
+
+	/**
+	 * Renders the status panel.
+	 *
+	 * @since 0.1.0
+	 */
+	function status_panel() { ?>
+
+		<div id="status-panel" class="panel" style="display:none;">
+			<h3><?php _e( 'Status', 'fallback-locales' ); ?></h3>
+			<table class="form-table">
+			<?php
+				$status = get_transient( 'fallback_locales' );
+				if ( $status ) : ?>
+					<tr>
+						<th><?php _e( 'Textdomain', 'fallback-locales' ); ?></th>
+						<th><?php _e( 'Translation Path', 'fallback-locales' ); ?></th>
+					</tr>
+					<?php foreach ( $status as $textdomain => $mofile ) : ?>
+						<tr valign="top">
+							<td><?php echo $textdomain; ?></td>
+							<?php if ( false === $mofile ) : ?>
+								<td><?php _e( 'Default', 'fallback-locales' ); ?></td>
+							<?php else : ?>
+								<td><?php echo str_replace( get_home_path(), '', $mofile ); ?></td>
+							<?php endif; ?>
+						</tr>
+					<?php endforeach;
+				else :
+					_e( 'No fallback locales in use.', 'fallback-locales' );
+				endif;
+			?>
+			</table>
+		</div>
+
+	<?php }
+
+	/**
+	 * Enqueues the required js
+	 *
+	 * @since 0.1.0
+	 */
+	function settings_js( $hook ) {
+
+		if ( 'settings_page_fallback-locales' != $hook ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'fallback-locales',
+			plugins_url( 'js/fallback-locales.js' , dirname(__FILE__) ),
+			array( 'jquery'),
+			'0.1.0',
+			true
+		);
 	}
 
 	/**
